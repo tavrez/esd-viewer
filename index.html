@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8" />
+	<title>Products.xml</title>
+	<style type="text/css">
+		.header {
+			width: 100%;
+			box-sizing: border-box;
+			background: white;
+			padding: 10px 0 10px 5px;
+			margin-bottom: 10px;
+			border-bottom: 2px solid black;
+			position: sticky;
+			top: 0;
+			left: 0;
+		}
+		#result {
+			margin: 0 5px;
+		}
+		body {
+			margin: 0;
+		}
+	</style>
+	<script>
+		var xmlFile = null;
+		var xslFile = null;
+		function loadFile() {
+			let { dialog } = require('electron').remote;
+			dialog.showOpenDialog({
+				title: 'Select File',
+				filters: [{ name: 'products.xml', extensions: ['xml'] }],
+				properties: ['openFile']
+			}, (files) => {
+				if (files) {
+					xmlFile = loadXMLDoc(files);
+					convert();
+				}
+			});
+		}
+		function loadXMLDoc(param) {
+			xmlHttp = new window.XMLHttpRequest();
+			xmlHttp.open("GET", param, false);
+			xmlHttp.send(null);
+			return xmlHttp.responseXML;
+		}
+		function convert() {
+			if (document.implementation && document.implementation.createDocument) {
+				xsltProcessor = new XSLTProcessor();
+				xsltProcessor.importStylesheet(xslFile);
+				resultDocument = xsltProcessor.transformToFragment(xmlFile, document);
+				document.getElementById("result").innerHTML = '';
+				document.getElementById("result").appendChild(resultDocument);
+			}
+		}
+		function init() {
+			xslFile = loadXMLDoc("style.xsl");
+		}
+		function copy(id, col) {
+			let clipData = '';
+			table = document.getElementById(id);
+			for (i = 1; i < table.rows.length; i++)
+				clipData += `${table.rows[i].cells[0].innerText} | ${table.rows[i].cells[col].innerText} | ${table.rows[i].cells[3].innerText}\n`;
+			return clipData;
+		}
+		function clipCopy(col) {
+			let { clipboard } = require('electron');
+			ot = (col == 1) ? '[spoiler]' : '--------';
+			ct = (col == 1) ? '[/spoiler]' : '';
+			clipboard.writeText(['x64', 'x86', 'ARM64'].reduce((a, c) => `${a}${c}:\n${ot}\n${copy(c, col)}${ct}\n`, ''));
+		}
+	</script>
+</head>
+
+<body onload="init()">
+	<div class="header">
+		<button type="button" onclick="loadFile()">Load products.xml</button>
+		<button type="button" onclick="clipCopy(1)">Copy Name and Hash</button>
+		<button type="button" onclick="clipCopy(2)">Copy URL and Hash</button>
+	</div>
+	<div id="result"></div>
+</body>
+
+</html>
