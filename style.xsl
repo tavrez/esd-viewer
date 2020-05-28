@@ -4,19 +4,19 @@
 	<xsl:output method="html" version="1.0" encoding="UTF-8" indent="no"/>
 	<xsl:template match="/">
 			x64:
-		<xsl:apply-templates select="MCT/Catalogs/Catalog/PublishedMedia/Files">
+		<xsl:apply-templates select="PublishedMedia/Files">
 			<xsl:with-param name="arch" select="'x64'" />
 		</xsl:apply-templates>
 			x86:
-		<xsl:apply-templates select="MCT/Catalogs/Catalog/PublishedMedia/Files">
+		<xsl:apply-templates select="PublishedMedia/Files">
 			<xsl:with-param name="arch" select="'x86'" />
 		</xsl:apply-templates>
 			ARM64:
-		<xsl:apply-templates select="MCT/Catalogs/Catalog/PublishedMedia/Files">
+		<xsl:apply-templates select="PublishedMedia/Files">
 			<xsl:with-param name="arch" select="'ARM64'" />
 		</xsl:apply-templates>
 	</xsl:template>
-	<xsl:template match="MCT/Catalogs/Catalog/PublishedMedia/Files">
+	<xsl:template match="PublishedMedia/Files">
 		<xsl:param name="arch" />
 		<table border="1">
 			<xsl:attribute name="id">

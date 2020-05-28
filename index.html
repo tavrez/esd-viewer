@@ -28,16 +28,15 @@
 		var xslFile = null;
 		function loadFile() {
 			let { dialog } = require('electron').remote;
-			dialog.showOpenDialog({
+			files = dialog.showOpenDialogSync({
 				title: 'Select File',
 				filters: [{ name: 'products.xml', extensions: ['xml'] }],
 				properties: ['openFile']
-			}, (files) => {
-				if (files) {
-					xmlFile = loadXMLDoc(files);
-					convert();
-				}
 			});
+			if (files) {
+					xmlFile = loadXMLDoc(files[0]);
+					convert();
+			}
 		}
 		function loadXMLDoc(param) {
 			xmlHttp = new window.XMLHttpRequest();
