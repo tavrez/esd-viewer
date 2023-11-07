@@ -26,26 +26,21 @@
 	<script>
 		var xmlFile = null;
 		var xslFile = null;
-		function loadFile() {
-			let { dialog } = require('electron').remote;
-			files = dialog.showOpenDialogSync({
-				title: 'Select File',
-				filters: [{ name: 'products.xml', extensions: ['xml'] }],
-				properties: ['openFile']
-			});
-			if (files) {
-					xmlFile = loadXMLDoc(files[0]);
+		async function loadFile() {
+			const {canceled, filePaths: [files]} = await API.openFile();
+			if (!canceled) {
+					xmlFile = await loadXMLDoc(files);
 					convert();
 			}
 		}
-		function loadXMLDoc(param) {
-			xmlHttp = new window.XMLHttpRequest();
-			xmlHttp.open("GET", param, false);
-			xmlHttp.send(null);
-			return xmlHttp.responseXML;
+		async function loadXMLDoc(param) {
+			const result = await fetch(param);
+			const text = await result.text();
+
+			return new DOMParser().parseFromString(text, "text/xml");
 		}
 		function convert() {
-			if (document.implementation && document.implementation.createDocument) {
+			if (document.implementation?.createDocument) {
 				xsltProcessor = new XSLTProcessor();
 				xsltProcessor.importStylesheet(xslFile);
 				resultDocument = xsltProcessor.transformToFragment(xmlFile, document);
@@ -53,8 +48,8 @@
 				document.getElementById("result").appendChild(resultDocument);
 			}
 		}
-		function init() {
-			xslFile = loadXMLDoc("style.xsl");
+		async function init() {
+			xslFile = await loadXMLDoc("style.xsl");
 		}
 		function copy(id, col) {
 			let clipData = '';
@@ -63,11 +58,10 @@
 				clipData += `${table.rows[i].cells[0].innerText} | ${table.rows[i].cells[col].innerText} | ${table.rows[i].cells[3].innerText}\n`;
 			return clipData;
 		}
-		function clipCopy(col) {
-			let { clipboard } = require('electron');
+		async function clipCopy(col) {
 			ot = (col == 1) ? '[spoiler]' : '--------';
 			ct = (col == 1) ? '[/spoiler]' : '';
-			clipboard.writeText(['x64', 'x86', 'ARM64'].reduce((a, c) => `${a}${c}:\n${ot}\n${copy(c, col)}${ct}\n`, ''));
+			await navigator.clipboard.writeText(['x64', 'x86', 'ARM64'].reduce((a, c) => `${a}${c}:\n${ot}\n${copy(c, col)}${ct}\n`, ''));
 		}
 	</script>
 </head>

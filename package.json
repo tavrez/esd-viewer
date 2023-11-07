@@ -1,12 +1,17 @@
 {
   "name": "products.xml",
   "version": "1.0.1",
-  "main": "main.js",
+  "main": "src/main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "debug": "nodemon --watch *.{js,html} --exec electron .",
+    "prebuild": "cp package.json src",
+    "build": "asar p src/ app.asar",
+    "postbuild": "rm src/package.json"
   },
   "license": "MIT",
   "devDependencies": {
-    "electron": "^9.0.0"
+    "@electron/asar": "^3.2.7",
+    "electron": "27.0.0"
   }
 }
